@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './DigitalGraveyard.css';
 import { REPOSITORIES } from '../data/mockData';
-import { Search, FolderGit2, ArrowRight, Play, AlertCircle, Clock } from 'lucide-react';
+import { Search, FolderGit2, ArrowRight, Clock } from 'lucide-react';
 
 interface DigitalGraveyardProps {
   onSelectRepo: (repoId: string) => void;

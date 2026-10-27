@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './GhostMemory.css';
 import { GHOST_MEMORY_EVENTS } from '../data/mockData';
-import { GitCommit, GitPullRequest, Bookmark, Sparkles, FileCode, CheckCircle2 } from 'lucide-react';
+import { GitCommit, GitPullRequest, Bookmark, Sparkles, FileCode } from 'lucide-react';
 
 export const GhostMemory: React.FC = () => {
   const [selectedTag, setSelectedTag] = useState<string>('All');

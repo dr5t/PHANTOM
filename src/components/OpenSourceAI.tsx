@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './OpenSourceAI.css';
 import { LOCAL_MODELS } from '../data/mockData';
-import { Cpu, ShieldCheck, Terminal, EyeOff, Radio, Lock } from 'lucide-react';
+import { Cpu, ShieldCheck, EyeOff, Radio, Lock } from 'lucide-react';
 
 export const OpenSourceAI: React.FC = () => {
   const [selectedModel, setSelectedModel] = useState<string>('llama-3.2-3b');

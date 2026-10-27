@@ -110,7 +110,9 @@ body {
 }
 
 /* Custom Scrollbars */
-scrollbar-color: var(--border-strong) var(--background);
+html, body {
+  scrollbar-color: var(--border-strong) var(--background);
+}
 
 @supports not (scrollbar-color: auto) {
   ::-webkit-scrollbar {

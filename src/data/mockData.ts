@@ -1,4 +1,4 @@
-import { RepositoryItem, MemoryEvent, ResurrectionReport, ModelOption } from '../types';
+import type { RepositoryItem, MemoryEvent, ResurrectionReport, ModelOption } from '../types';
 
 export const REPOSITORIES: RepositoryItem[] = [
   {
@@ -112,6 +112,7 @@ export const GHOST_MEMORY_EVENTS: MemoryEvent[] = [
     type: 'stash',
     timestamp: '2024-03-18 04:45:00 UTC',
     relativeTime: '7 months ago',
+    author: 'shauryatiwari',
     message: 'WIP on feature/pkce-v2: half-implemented indexedDB persistent vault',
     fileReference: 'src/storage/vault.ts',
     lineNumber: 68,

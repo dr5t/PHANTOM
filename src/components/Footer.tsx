@@ -1,6 +1,5 @@
 import React from 'react';
 import './Footer.css';
-import { Terminal, Shield, GitBranch } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (

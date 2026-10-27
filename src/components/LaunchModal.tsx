@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './LaunchModal.css';
 import { REPOSITORIES } from '../data/mockData';
-import { X, Terminal, Cpu, Play, CheckCircle2, Send, Sparkles, FolderGit2 } from 'lucide-react';
+import { X, Terminal, Play, CheckCircle2, Send, Sparkles } from 'lucide-react';
 
 interface LaunchModalProps {
   isOpen: boolean;
