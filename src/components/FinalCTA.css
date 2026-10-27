@@ -1,0 +1,77 @@
+.final-cta-section {
+  padding-top: clamp(80px, 10vw, 130px);
+  padding-bottom: clamp(80px, 10vw, 130px);
+  border-top: 1px solid var(--border);
+  position: relative;
+  text-align: center;
+}
+
+.final-cta-card {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 60px 36px;
+  position: relative;
+  background-color: var(--surface);
+}
+
+.final-cta-headline {
+  font-size: clamp(2rem, 4.5vw, 3.25rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  letter-spacing: -0.03em;
+}
+
+.final-cta-desc {
+  font-size: clamp(1rem, 1.8vw, 1.125rem);
+  color: var(--text-secondary);
+  max-width: 580px;
+  margin: 0 auto 36px;
+  line-height: 1.6;
+}
+
+.final-cta-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+
+.install-command-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background-color: var(--terminal-background);
+  border: 1px solid var(--border-strong);
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.install-cmd-text {
+  color: var(--accent);
+}
+
+.install-copy-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  transition: color var(--transition-fast);
+}
+
+.install-copy-btn:hover {
+  color: var(--text-primary);
+}
