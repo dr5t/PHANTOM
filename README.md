@@ -1,289 +1,398 @@
-# 🪦 PHANTOM — Local-First AI Software Archaeology
+<p align="center">
+  <a href="https://github.com/dr5t/PHANTOM">
+    <img src="public/favicon.svg" width="80" height="80" alt="PHANTOM Logo">
+  </a>
+</p>
 
-> **"Your Machine Remembers What You Have Forgotten."**
+<h1 align="center">PHANTOM</h1>
 
-PHANTOM is an open-source, local-first software archaeology tool. It investigates dormant and abandoned Git codebases, uncovers forgotten implementation details, reconstructs historical decision trajectories, surfaces buried TODOs and unmerged stashes, and synthesizes evidence-backed project resurrection blueprints using on-device open-weight LLMs.
+<p align="center">
+  <strong>Your Machine Remembers What You Have Forgotten.</strong><br>
+  <em>A local-first AI software archaeology tool for investigating Git repositories, uncovering forgotten implementation details, and synthesizing actionable recovery plans.</em>
+</p>
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.6%20%7C%207.0-blue.svg)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-19.3-61dafb.svg)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-8.3-646CFF.svg)](https://vitejs.dev/)
-[![Vitest](https://img.shields.io/badge/Vitest-2.1-green.svg)](https://vitest.dev/)
-[![Ollama](https://img.shields.io/badge/Ollama-Local%20Inference-black.svg)](https://ollama.ai/)
-[![Privacy](https://img.shields.io/badge/Privacy-100%25%20Air--Gapped-brightgreen.svg)](#security--threat-model)
+<p align="center">
+  <a href="https://github.com/dr5t/PHANTOM"><img src="https://img.shields.io/badge/Repository-dr5t%2FPHANTOM-black?style=flat-square&logo=github" alt="GitHub Repository"></a>
+  <img src="https://img.shields.io/badge/Frontend-React%2019%20%7C%20TypeScript%20%7C%20Vite-blue?style=flat-square" alt="Frontend Stack">
+  <img src="https://img.shields.io/badge/Backend-Node.js%20%7C%20Express-green?style=flat-square" alt="Backend Stack">
+  <img src="https://img.shields.io/badge/Tests-21%20Passing%20(Vitest)-brightgreen?style=flat-square" alt="Test Status">
+  <img src="https://img.shields.io/badge/Local%20AI-Ollama%20(Optional)-orange?style=flat-square" alt="Ollama Integration">
+</p>
+
+<p align="center">
+  <a href="#-overview">Overview</a> •
+  <a href="#-the-problem-software-archaeology">The Problem</a> •
+  <a href="#-features--implementation-status">Features & Status</a> •
+  <a href="#-application-walkthrough--screenshots">Screenshots</a> •
+  <a href="#-architecture">Architecture</a> •
+  <a href="#-technology-stack">Tech Stack</a> •
+  <a href="#-getting-started">Getting Started</a> •
+  <a href="#-local-ai-setup-optional">Ollama Setup</a> •
+  <a href="#-security-and-privacy-notes">Security & Privacy</a> •
+  <a href="#-creator">Creator</a> •
+  <a href="#-license">License</a>
+</p>
 
 ---
 
-## 🏛️ Core Philosophy
+## 📖 Overview
 
-- **Zero Cloud Leakage:** All Git log extraction, AST source scanning, vector search, and model inference execute strictly within your local machine.
-- **Evidence-Grounded Factualism:** Verified repository facts (commit hashes, authors, line numbers, file paths) are strictly distinguished from AI interpretations. If evidence is lacking, PHANTOM explicitly acknowledges that conclusions cannot be established.
-- **Safe Subprocess Security:** All Git executions use sanitized argument arrays (`child_process.execFile`). No arbitrary shell commands, pipes, or redirects are exposed.
-- **Actionable Resurrection:** Produces structured Markdown reports and concrete bash remediation recipes. Generated commands are never executed automatically without human review.
+**PHANTOM** is a developer tool built to inspect existing and dormant Git codebases, extract chronological project history, surface unresolved comments and uncommitted stashes, and generate structured recovery reports. 
+
+When connected to a local [Ollama](https://ollama.com) runtime, PHANTOM performs evidence-grounded analysis of repository artifacts (commit diffs, file trees, and source comments) using on-device open-weight models, without sending source code to hosted cloud AI APIs. If Ollama is offline or uninstalled, PHANTOM's core Git forensics, source scanning, and recovery report generation continue to operate locally via deterministic rule engines.
 
 ---
 
-## ⚡ System Architecture
+## 🔍 The Problem: Software Archaeology
 
+Every developer has inherited unfamiliar code or revisited a project abandoned months ago:
+
+1. **Context Dissolves**: Crucial architectural decisions disappear into sprawling Git logs or unmerged branches.
+2. **Uncommitted Work Gets Shelved**: Temporary experiments and partial implementations often remain hidden in unmerged `git stash` entries.
+3. **Buried Landmines**: Critical warnings, incomplete token refreshes, and temporary workarounds lie scattered across files as `TODO`, `FIXME`, or `HACK` comments.
+4. **Missing Documentation**: Traditional project documentation is frequently out of sync with what the code actually does.
+
+PHANTOM addresses this by treating the repository itself as the primary archaeological record: extracting verifiable ground truth directly from Git metadata, diffs, and source text.
+
+---
+
+## ✨ Features & Implementation Status
+
+To provide transparent documentation, the table below distinguishes between features verified end-to-end against live repositories and demonstration fixtures provided for UI exploration:
+
+| Capability | Status | Implementation Detail |
+| :--- | :---: | :--- |
+| **Git Commit Forensics** | ✅ Functional | Extracts commit history, authors, timestamps, file stats, and additions/deletions using `git log` with custom format flags. |
+| **Branch & Tag Inspection** | ✅ Functional | Queries local and remote branches and tag references via `git branch -a` and `git tag -l`. |
+| **Git Stash Forensics** | ✅ Functional | Inspects unmerged stash entries (`git stash list`) and retrieves diff previews (`git stash show -p`). |
+| **Working Tree Inspection** | ✅ Functional | Detects modified, added, and untracked files via `git status --porcelain=v1`. |
+| **Commit Diff Inspection** | ✅ Functional | Validates hash patterns and retrieves diff statistics using `git show --stat -p <hash>`. |
+| **Source Code & TODO Scanner** | ✅ Functional | Recursively scans files up to 500 KB (up to 2,500 files) for `TODO`, `FIXME`, `HACK`, `BUG`, `XXX`, and `NOTE` annotations with line numbers and 3-line surrounding context. |
+| **Language Profiling** | ✅ Functional | Calculates language distribution across 25+ file extensions and determines the primary language. |
+| **Real-time SSE Scanning** | ✅ Functional | Server-Sent Events endpoint (`/api/repos/scan-stream`) streams live progress through 6 stages (`validating` → `complete`). |
+| **Controlled Terminal CLI** | ✅ Functional | Parameterized command dispatcher executing safe commands (`status`, `history`, `todos`, `stashes`, `branches`, `diff`, `models`, `ask`, `report`, `help`, `clear`). Arbitrary shell execution is blocked. |
+| **Resurrection Report Generator**| ✅ Functional | Synthesizes an overview, dormancy diagnosis, historical milestones, unfinished features, risk flags, and non-destructive next steps into exportable Markdown. |
+| **Ollama Local AI Discovery** | ✅ Functional | Checks `http://127.0.0.1:11434/api/tags` to discover locally installed models (e.g., Llama 3.2, Qwen 2.5 Coder). |
+| **Evidence-Grounded AI Q&A** | ✅ Functional | Tokenizes queries, retrieves matching repository evidence, bounds the prompt with injection defenses, and queries the local model (or returns a deterministic forensic finding if offline). |
+| **Demonstration Fixtures** | ℹ️ Labeled Fixture | Pre-configured demonstration projects (`nexus-auth-v2`, `spectral-fs`, etc.) in `src/data/mockData.ts` provide immediate interactive examples in the UI prior to scanning a repository. |
+
+---
+
+## 📸 Application Walkthrough & Screenshots
+
+These screenshots represent the actual running application connected to its local forensics server:
+
+### 1. Main Dashboard & Hero
+*Dark grid interface displaying real-time system status and immediate entry points.*
+<p align="center">
+  <img src="docs/assets/screenshots/dashboard.png" alt="PHANTOM Dashboard and Hero" width="95%">
+</p>
+
+### 2. Controlled Forensic Terminal
+*Executing `$ status` and forensic queries against a repository without exposing an unrestricted shell.*
+<p align="center">
+  <img src="docs/assets/screenshots/repository-analysis.png" alt="Controlled Forensic Terminal" width="95%">
+</p>
+
+### 3. Real-Time Archaeological Scanner & Q&A Dialog
+*Live Server-Sent Events stream showing progress through Git history, stash analysis, and TODO discovery, followed by evidence-grounded inquiry.*
+<p align="center">
+  <img src="docs/assets/screenshots/ai-investigation.png" alt="Real-time Scanner and Evidence Q&A" width="95%">
+</p>
+
+### 4. Resurrection Mode & Blueprint Export
+*Structured recovery blueprint detailing dormancy causes, blockers, and safe, human-reviewed next steps with Markdown export.*
+<p align="center">
+  <img src="docs/assets/screenshots/recovery-report.png" alt="Resurrection Mode Recovery Report" width="95%">
+</p>
+
+---
+
+## 🏛️ Architecture
+
+```mermaid
+flowchart TD
+    subgraph Frontend ["Frontend Client (React 19 + TypeScript)"]
+        UI[Dark Grid UI]
+        TERM[Controlled Terminal Component]
+        MODAL[Scan & Q&A Modal]
+        REP_UI[Resurrection Report View]
+        API_CLIENT[src/services/api.ts]
+        
+        UI --> API_CLIENT
+        TERM --> API_CLIENT
+        MODAL --> API_CLIENT
+        REP_UI --> API_CLIENT
+    end
+
+    subgraph Backend ["Forensics Backend (Node.js + Express)"]
+        ROUTER[API Router /api]
+        SEC[Path & Subprocess Security]
+        GIT[Git Forensics Module]
+        TODO[Source Code Scanner]
+        EVID[Evidence Retrieval Engine]
+        TERM_CMD[Controlled Command Parser]
+        REPORT[Report Generator]
+        OLLAMA_CLI[Ollama Client]
+        STORE[(In-Memory Repo Store)]
+
+        ROUTER --> SEC
+        SEC --> GIT
+        SEC --> TODO
+        ROUTER --> TERM_CMD
+        ROUTER --> EVID
+        ROUTER --> REPORT
+        EVID --> OLLAMA_CLI
+        ROUTER --> STORE
+    end
+
+    subgraph LocalHost ["Host System Runtime"]
+        REPO[(Target Git Repository)]
+        OLLAMA_DAEMON[(Local Ollama Service 127.0.0.1:11434)]
+    end
+
+    API_CLIENT -->|HTTP / Vite Proxy| ROUTER
+    GIT -->|execFile git args| REPO
+    TODO -->|fs.readFile| REPO
+    OLLAMA_CLI -->|HTTP /api/generate| OLLAMA_DAEMON
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│                      PHANTOM DARK GRID FRONTEND                         │
-│   React 19 · TypeScript · Vite · Lucide Icons · CSS Grid Tokens        │
-│                                                                        │
-│  [Hero & Navbar]     [Live Controlled Terminal]    [Ghost Memory]      │
-│  [Digital Graveyard] [Resurrection Mode]           [OpenSourceAI]      │
-└──────────────────────────────────┬─────────────────────────────────────┘
-                                   │ Vite API Proxy (/api -> :3001)
-                                   ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                     PHANTOM FORENSICS BACKEND                          │
-│               Node.js · Express · TypeScript · Vitest                  │
-├────────────────────────────────────────────────────────────────────────┤
-│  • routes.ts         REST endpoints & Server-Sent Events (SSE)         │
-│  • git.ts            Commit graphs, diffs, branches, stashes, tags     │
-│  • security.ts       Filesystem boundaries & subprocess sanitization   │
-│  • todos.ts          TODO, FIXME, HACK detection & language profiling  │
-│  • evidenceAi.ts     Bounded evidence retrieval & prompt protection    │
-│  • reports.ts        Resurrection blueprint & Markdown exporter        │
-│  • terminal.ts       Controlled CLI command parser                     │
-│  • ollama.ts         Genuine local Ollama runtime discovery & prompt   │
-└──────────────────────────────────┬─────────────────────────────────────┘
-                                   │ HTTP (127.0.0.1:11434)
-                                   ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                        LOCAL OLLAMA RUNTIME                            │
-│  • Llama 3.2 (3B) · Qwen 2.5 Coder (7B) · DeepSeek-Coder (6.7B)        │
-│  • 100% Offline · Apple Metal / NVIDIA CUDA / CPU SIMD acceleration    │
-└────────────────────────────────────────────────────────────────────────┘
-```
+
+### Data Flow Walkthrough
+1. **Request & Validation**: The frontend communicates with the Express backend via `/api`. The backend's security module verifies that the target path exists, is a directory, and contains a valid `.git` repository worktree.
+2. **Forensic Extraction**: Subprocesses run `git log`, `git branch`, `git stash`, and `git status` using parameterized argument arrays (`execFile`) rather than string concatenation.
+3. **Source Inspection**: The scanner iterates through codebase files (excluding `node_modules`, build outputs, and sensitive files), capturing `TODO`/`FIXME` lines, line numbers, and surrounding context.
+4. **Evidence-Grounded Querying**: User questions are matched against commits, stashed diffs, and TODO items. If an Ollama model is available, the bounded evidence is passed to the local LLM with prompt injection safeguards. If Ollama is unavailable, a deterministic summary of discovered evidence is returned.
+5. **Report Formulation**: The report generator aggregates metrics (inactivity days, author, branches, stashes, and flags) into an actionable recovery blueprint.
 
 ---
 
-## ✨ Features & Capabilities
+## 🧰 Technology Stack
 
-### 1. Real Git Forensics Engine
-- **Commit History & Metrics:** Parses commits, authors, timestamps, additions, deletions, and changed files across all branches.
-- **Stash Archaeology:** Uncovers uncommitted git stashes with diff previews, rescuing work that was abruptly abandoned.
-- **Dormancy Calculation:** Accurately computes repository inactivity days and pinpoints the last active developer.
-- **Working Tree Inspection:** Scans for uncommitted modifications left in working directories.
+### Frontend Client
+- **Framework**: [React 19](https://react.dev/) (`react@^19.3.1`, `react-dom@^19.3.1`)
+- **Language**: [TypeScript](https://www.typescriptlang.org/) (Strict Mode)
+- **Build Tool & Dev Server**: [Vite 8](https://vitejs.dev/) with `/api` proxy configuration
+- **Icons**: [Lucide React](https://lucide.dev/) (`lucide-react@^1.62.0`)
+- **Styling**: Vanilla CSS with custom Dark Grid design tokens and CSS variables
 
-### 2. Source Code & TODO Analysis
-- **Keyword Scanner:** Identifies `TODO`, `FIXME`, `HACK`, `XXX`, `BUG`, and `NOTE` annotations with line numbers and 3-line code context.
-- **Priority Categorization:** High priority automatically assigned to `FIXME`, `BUG`, and critical security keywords (`urgent`, `broken`, `fatal`).
-- **Language Detection:** Analyzes codebase file sizes across 25+ language extensions.
+### Forensics Backend
+- **Runtime**: [Node.js](https://nodejs.org/) (v20+ recommended)
+- **Framework**: [Express 4](https://expressjs.com/) (`express@^4.21.0`)
+- **CORS Support**: `cors@^2.8.5`
+- **TypeScript Runner**: [tsx](https://github.com/privatenumber/tsx) for development watch mode
+- **Compiler**: TypeScript (`typescript@~5.6.0`)
+- **Subprocess Execution**: Node's `child_process.execFile` with argument arrays
 
-### 3. Genuine Local Ollama Integration
-- **Runtime Discovery:** Connects to `http://127.0.0.1:11434/api/tags` to discover locally installed models, parameter sizes, and quantization levels.
-- **Air-Gapped Inference:** Calls `POST /api/generate` with zero cloud fallback.
-- **Graceful Offline Mode:** If Ollama is offline or uninstalled, all Git forensics, TODO extraction, and report generation continue to operate with 100% fidelity.
-
-### 4. Evidence-Grounded Q&A
-- Queries are answered by retrieving matching commits, diffs, stashes, and TODOs, formatting them into structured evidence items with file locations and line references.
-- Strict system prompt defending against prompt injection attacks embedded inside repository contents.
-
-### 5. Controlled Forensic Terminal
-- Replaces unrestricted shell execution with a secure command parser supporting:
-  - `status`: Displays current repository forensic summary.
-  - `history [limit]`: Shows recent commits with short hashes and authors.
-  - `todos [filter]`: Displays pending TODOs, FIXMEs, and HACKs.
-  - `stashes`: Inspects uncommitted git stashes.
-  - `branches`: Lists branches and current HEAD.
-  - `diff <hash>`: Safe commit diff inspector.
-  - `models`: Queries local Ollama runtime and lists installed models.
-  - `ask <query>`: Queries evidence-grounded AI engine.
-  - `report`: Generates archaeological recovery report.
-  - `clear` & `help`: Terminal controls.
-
-### 6. Real-Time Scanning via SSE
-- Real Server-Sent Events (`/api/repos/scan-stream`) report real progress phases:
-  - `validating` → `history` → `branches` → `stashes` → `todos` → `files` → `complete`.
-
-### 7. Markdown Resurrection Reports
-- Generates comprehensive recovery blueprints including:
-  - Project overview & dormancy diagnosis.
-  - Recent historical milestones.
-  - Unfinished features with estimated completion percentages.
-  - Potential issues and risk classifications.
-  - Recommended next steps with non-destructive action commands.
-  - Exportable as a GitHub-flavored Markdown document.
+### Testing
+- **Test Runner**: [Vitest 2.1](https://vitest.dev/) (`vitest@^2.1.0`)
+- **Linter**: [Oxlint](https://oxc.rs/) (`oxlint@^1.89.0`)
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+- **Node.js**: `v20.0.0` or higher
+- **npm**: `v10.0.0` or higher
+- **Git**: Installed and accessible in your shell `PATH`
+- *(Optional)* **Ollama**: For local neural inference ([ollama.com](https://ollama.com))
 
-- **Node.js** v20.0.0 or higher
-- **npm** v10.0.0 or higher
-- **Git** installed and available in PATH
-- *(Optional for AI)* **Ollama** installed from [ollama.com](https://ollama.com)
+### 1. Clone the Repository
+```bash
+git clone https://github.com/dr5t/PHANTOM.git
+cd PHANTOM
+```
 
----
+### 2. Install Dependencies
+Install dependencies for both the frontend client and the forensics server:
+```bash
+# Install root/frontend dependencies
+npm install
 
-### Installation
+# Install backend server dependencies
+npm install --prefix server
+```
 
-1. Clone or navigate to the repository:
-   ```bash
-   git clone <repo-url>
-   cd "MLH-3rd challenge"
-   ```
+### 3. Run the Development Servers
+Running PHANTOM locally requires starting both the backend server and the frontend client. Use two separate terminal windows:
 
-2. Install root and frontend dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Install server dependencies:
-   ```bash
-   cd server && npm install && cd ..
-   ```
-
----
-
-### Running the Application
-
-You can run the frontend and backend in separate terminal tabs:
-
-#### Terminal 1 — Start the Forensics Backend:
+#### Terminal 1 — Forensics Backend:
 ```bash
 npm run server:dev
 ```
-*The backend starts at `http://127.0.0.1:3001` with API routes mounted under `/api`.*
+*The backend server starts on `http://127.0.0.1:3001` with API routes mounted under `/api`.*
 
-#### Terminal 2 — Start the Frontend UI:
+#### Terminal 2 — Frontend Client:
 ```bash
 npm run dev
 ```
-*The Vite frontend starts at `http://127.0.0.1:5173`. Requests to `/api/*` are automatically proxied to `:3001`.*
+*The Vite frontend starts on `http://127.0.0.1:5173`. API calls to `/api/*` are automatically forwarded to `:3001` via Vite's proxy.*
 
-Open your browser to `http://127.0.0.1:5173`.
+Open your browser to **`http://127.0.0.1:5173`**.
 
 ---
 
-## 🤖 Ollama Local AI Setup (Optional)
+## 🧪 Testing and Builds
 
-PHANTOM's Git forensics, AST scans, and report generation work completely offline without Ollama. To enable deep neural Q&A:
+All Git forensic routines, security path checks, and report generators are covered by automated tests executing against dynamically created temporary Git repositories.
 
-1. Install Ollama:
-   ```bash
-   # macOS (Homebrew)
-   brew install ollama
+```bash
+# Run the backend test suite
+npm test
 
-   # Linux
-   curl -fsSL https://ollama.com/install.sh | sh
-   ```
+# Run the frontend production build
+npm run build
 
-2. Start the local Ollama daemon:
+# Run the backend TypeScript compilation
+npm run server:build
+
+# Run the linter
+npm run lint
+```
+
+### Verified Test Suite Output
+```text
+ ✓ server/test/forensics.test.ts (21)
+   ✓ PHANTOM Forensics & Architecture Suite (21)
+     ✓ 1. Repository Validation & Security Boundaries (5)
+       ✓ validates a genuine git repository correctly
+       ✓ rejects non-existent directory paths
+       ✓ rejects paths containing null bytes
+       ✓ rejects empty paths
+       ✓ correctly detects sensitive credentials and key files
+     ✓ 2. Git History & Artifact Extraction (6)
+       ✓ extracts commit history with metadata
+       ✓ extracts branches correctly
+       ✓ extracts stashes accurately
+       ✓ detects uncommitted files in working tree
+       ✓ fetches commit diff content without crashing
+       ✓ rejects malformed or injected diff hashes
+     ✓ 3. TODO & Codebase Forensics (3)
+       ✓ discovers TODO, FIXME, BUG, and HACK items with line numbers and priorities
+       ✓ detects primary programming language correctly
+       ✓ reads README content for context
+     ✓ 4. Resurrection Report Generation (2)
+       ✓ generates a structured ResurrectionReport
+       ✓ formats report into valid GitHub markdown with sections and code blocks
+     ✓ 5. Evidence-Grounded Q&A Engine (2)
+       ✓ retrieves relevant evidence references for a query
+       ✓ acknowledges lack of evidence when query is completely unrelated
+     ✓ 6. Controlled Terminal Command Parser (3)
+       ✓ executes safe commands like status, history, todos, stashes, help
+       ✓ blocks arbitrary shell commands and outputs warning
+       ✓ handles clear command
+
+ Test Files  1 passed (1)
+      Tests  21 passed (21)
+```
+
+---
+
+## 🤖 Local AI Setup (Optional)
+
+PHANTOM's core Git analysis, source scanning, and report generation work offline without Ollama. If you wish to enable neural Q&A:
+
+1. **Install Ollama**: Follow instructions at [ollama.com](https://ollama.com).
+2. **Start the Ollama daemon**:
    ```bash
    ollama serve
    ```
-
-3. Pull your preferred coding model:
+3. **Pull a model**:
    ```bash
+   # Lightweight option (approx. 2.0 GB)
    ollama pull llama3.2
-   # or
+
+   # Code-focused option (approx. 4.7 GB)
    ollama pull qwen2.5-coder:7b
-   # or
-   ollama pull deepseek-coder:6.7b
    ```
-
-4. Refresh PHANTOM's **Open Source AI** section or open the **Scanner Modal** to see your locally installed models detected immediately.
-
----
-
-## 🧪 Testing
-
-The test suite validates Git history extraction, security boundaries, invalid path rejection, TODO detection, evidence grounding, and report generation against dynamically created temporary Git repositories.
-
-Run all tests:
-```bash
-npm test
-```
-*or directly inside the server directory:*
-```bash
-cd server && npm test
-```
-
-Build verification:
-```bash
-# Frontend production build
-npm run build
-
-# Backend TypeScript build
-npm run server:build
-```
+4. **Endpoint Configuration**: By default, PHANTOM connects to `http://127.0.0.1:11434`. You can override this by starting the server with:
+   ```bash
+   OLLAMA_HOST=http://127.0.0.1:11434 npm run server:dev
+   ```
+When active, PHANTOM's UI reflects `RUNTIME STATUS: ACTIVE` and displays your installed models.
 
 ---
 
-## 🔒 Security & Threat Model
+## 🔒 Security and Privacy Notes
 
-1. **Subprocess Isolation:** Commands are executed strictly through `execFile('git', args, ...)` with argument arrays. Input strings are never passed to a shell (`/bin/sh` or `/bin/bash`), eliminating shell injection vulnerabilities.
-2. **Sensitive File Boundary:** The scanner strictly ignores sensitive files including `.env*`, `id_rsa`, `id_ed25519`, `*.pem`, `*.key`, `credentials.json`, `secret*`, and `.git-credentials`.
-3. **Restricted Paths:** Only verified Git repository directories are accepted. Null-byte injection and non-directory paths are rejected.
-4. **Prompt Injection Defense:** Repository contents are treated as untrusted data and strictly bounded within evidence citation blocks.
-5. **No Automatic Command Execution:** Recovery commands in reports and terminal output are formatted for human inspection. PHANTOM will never execute write commands without user consent.
+- **Subprocess Safety**: Subprocesses are executed strictly via `child_process.execFile` with argument arrays. User input is never evaluated in a shell, eliminating command injection risks.
+- **Sensitive File Exclusion**: The scanner skips sensitive files by default, including `.env*`, `id_rsa`, `id_ed25519`, `*.pem`, `*.key`, `credentials.json`, `*secret*`, and `.git-credentials`.
+- **Local Git & Model Execution**: Git commands, repository indexing, and Ollama inference execute on your local machine. Source code is not sent to external AI providers.
+- **Web Font Network Requests**: In `index.html`, typography (`Inter` and `JetBrains Mono`) is imported from Google Fonts via CDN (`fonts.googleapis.com` / `fonts.gstatic.com`). Users requiring complete isolation from external network requests must self-host these font files locally.
+- **Local Network Scope**: The Express backend is configured for local development (`cors` allows `origin: '*'`). It does not implement multi-user authentication or role-based access control and is intended for single-user local development environments.
+- **Non-Destructive Guidance**: PHANTOM generates command recommendations for human review. It does not automatically run write or delete commands on the user's repository.
 
 ---
 
 ## 📁 Repository Structure
 
 ```
-.
-├── server/                       # Backend Forensics Engine
+PHANTOM/
+├── docs/                         # Documentation Assets
+│   └── assets/
+│       ├── architecture.svg      # System architecture vector diagram
+│       └── screenshots/          # Application screenshots
+│           ├── dashboard.png
+│           ├── repository-analysis.png
+│           ├── ai-investigation.png
+│           └── recovery-report.png
+├── public/                       # Static Public Assets
+│   ├── favicon.svg               # PHANTOM project emblem
+│   └── icons.svg                 # SVG sprite sheet
+├── server/                       # Forensics Backend (Node.js + Express)
 │   ├── src/
-│   │   ├── index.ts              # Express entry point & middleware
-│   │   ├── routes.ts             # API endpoints & SSE scan stream
-│   │   ├── git.ts                # Git history, branches, stashes, diffs
-│   │   ├── security.ts           # Path validation & subprocess security
-│   │   ├── todos.ts              # Codebase scanner & TODO forensics
-│   │   ├── ollama.ts             # Local Ollama client & model discovery
-│   │   ├── evidenceAi.ts         # Evidence retrieval & Q&A grounding
-│   │   ├── reports.ts            # Recovery report & Markdown generator
+│   │   ├── index.ts              # Express app entry & configuration
+│   │   ├── routes.ts             # API routes & SSE stream endpoint
+│   │   ├── git.ts                # Git operations (log, branch, stash, diff)
+│   │   ├── security.ts           # Path validation & subprocess execution
+│   │   ├── todos.ts              # Codebase scanner & TODO priority extraction
+│   │   ├── ollama.ts             # Ollama API client & model discovery
+│   │   ├── evidenceAi.ts         # Evidence grounding & prompt boundaries
+│   │   ├── reports.ts            # Resurrection report formulation
 │   │   ├── terminal.ts           # Controlled CLI command parser
-│   │   ├── store.ts              # In-memory repository index
+│   │   ├── store.ts              # In-memory repository cache
 │   │   └── types.ts              # Shared TypeScript definitions
 │   ├── test/
-│   │   └── forensics.test.ts     # Automated Git forensics test suite
+│   │   └── forensics.test.ts     # Automated test suite using temp Git repos
 │   ├── package.json              # Server dependencies & scripts
 │   └── tsconfig.json             # Server TypeScript configuration
-├── src/                          # Frontend User Interface
-│   ├── components/               # React components (Dark Grid System)
-│   │   ├── Hero.tsx              # Hero header & entry call-to-actions
-│   │   ├── Navbar.tsx            # Navigation & status indicator
-│   │   ├── TerminalPreview.tsx   # Live controlled CLI & output
-│   │   ├── GhostMemory.tsx       # Forensic timeline & AST facts
-│   │   ├── DigitalGraveyard.tsx  # Discovered repository archive
-│   │   ├── ResurrectionMode.tsx  # Project recovery report & export
-│   │   ├── OpenSourceAI.tsx      # Ollama model status & selector
-│   │   └── LaunchModal.tsx       # Real-time SSE scanner & Q&A dialog
+├── src/                          # Frontend Application (React 19 + TypeScript)
+│   ├── components/               # UI components
+│   │   ├── Hero.tsx              # Landing hero section
+│   │   ├── Navbar.tsx            # Navigation header
+│   │   ├── TerminalPreview.tsx   # Interactive controlled CLI terminal
+│   │   ├── GhostMemory.tsx       # Timeline reconstruction
+│   │   ├── DigitalGraveyard.tsx  # Discovered repository archive table
+│   │   ├── ResurrectionMode.tsx  # Recovery report viewer & export
+│   │   ├── OpenSourceAI.tsx      # Model status & configuration
+│   │   └── LaunchModal.tsx       # Live SSE scan & Q&A modal
 │   ├── services/
 │   │   └── api.ts                # Frontend API client
-│   ├── types/                    # Frontend type definitions
-│   ├── data/                     # Demonstration fixtures
-│   ├── App.tsx                   # Main application layout
-│   └── index.css                 # Dark grid typography and tokens
-├── vite.config.ts                # Vite config with /api proxy
-├── package.json                  # Root scripts
-└── README.md                     # Documentation
+│   ├── data/
+│   │   └── mockData.ts           # Labeled demonstration fixtures
+│   ├── types/
+│   │   └── index.ts              # Frontend TypeScript definitions
+│   ├── App.tsx                   # Main layout container
+│   └── index.css                 # Dark grid theme tokens & styling
+├── index.html                    # HTML entry point (loads web fonts)
+├── vite.config.ts                # Vite config with backend proxy
+├── package.json                  # Root scripts & dependencies
+└── README.md                     # Project documentation
 ```
 
 ---
 
-## ⚖️ Implementation Status
+## 👤 Creator
 
-| Capability | Status | Implementation Detail |
-| :--- | :---: | :--- |
-| **Git Commit Forensics** | ✅ Implemented | Genuine `git log` metadata extraction with shortstat and authors |
-| **Git Stash Archaeology** | ✅ Implemented | Genuine `git stash list` & `git stash show -p` inspection |
-| **TODO/FIXME Analysis** | ✅ Implemented | Multi-language regex scanner with priorities and context |
-| **Controlled Terminal** | ✅ Implemented | Safe command dispatcher without unrestricted shell access |
-| **Real-Time SSE Scan** | ✅ Implemented | Live Server-Sent Events reporting 6 forensic stages |
-| **Recovery Report (.md)** | ✅ Implemented | Structured report generation, clipboard copy, and Markdown download |
-| **Ollama Model Discovery**| ✅ Implemented | Genuine `127.0.0.1:11434` connection check and model tags listing |
-| **Evidence Grounded Q&A** | ✅ Implemented | Context retrieval across commits, TODOs, and stashes |
-| **Automated Tests** | ✅ Implemented | 21 Vitest tests running on temporary Git repositories |
+Created and developed by **Shaurya Tiwari** ([@dr5t](https://github.com/dr5t)).
+
+Repository: [https://github.com/dr5t/PHANTOM](https://github.com/dr5t/PHANTOM)  
+Issues & Inquiries: [https://github.com/dr5t/PHANTOM/issues](https://github.com/dr5t/PHANTOM/issues)
 
 ---
 
-## 📄 License
+## 📜 License
 
-MIT License. Built for developers reviving the forgotten corners of their hard drives.
+*Notice: No license file is currently present in this repository.*
+
+All rights are reserved by the creator. Public availability on GitHub does not automatically grant permission to reuse, modify, or redistribute this codebase for commercial or non-commercial purposes without explicit authorization.
