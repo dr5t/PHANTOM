@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './DigitalGraveyard.css';
-import { REPOSITORIES } from '../data/mockData';
-import { Search, FolderGit2, ArrowRight, Clock } from 'lucide-react';
+import { REPOSITORIES as DEMO_REPOSITORIES } from '../data/mockData';
+import { Search, FolderGit2, ArrowRight, Clock, RefreshCw } from 'lucide-react';
+import { fetchRepositories } from '../services/api';
+import type { RepositoryItem } from '../types';
 
 interface DigitalGraveyardProps {
   onSelectRepo: (repoId: string) => void;
@@ -10,13 +12,44 @@ interface DigitalGraveyardProps {
 export const DigitalGraveyard: React.FC<DigitalGraveyardProps> = ({ onSelectRepo }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLang, setSelectedLang] = useState<string>('All');
+  const [repos, setRepos] = useState<RepositoryItem[]>(DEMO_REPOSITORIES);
+  const [isLoading, setIsLoading] = useState(false);
+  const [backendConnected, setBackendConnected] = useState(false);
+
+  const loadRepos = async () => {
+    setIsLoading(true);
+    try {
+      const realRepos = await fetchRepositories();
+      if (realRepos && realRepos.length > 0) {
+        // Tag demo repos with a badge or label and combine with real repos
+        const labeledDemo = DEMO_REPOSITORIES.map((r) => ({
+          ...r,
+          description: `[DEMO FIXTURE] ${r.description}`,
+        }));
+        setRepos([...realRepos, ...labeledDemo]);
+        setBackendConnected(true);
+      } else {
+        setRepos(DEMO_REPOSITORIES);
+      }
+    } catch {
+      // Fallback to demo repositories if backend is still spinning up
+      setRepos(DEMO_REPOSITORIES);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadRepos();
+  }, []);
 
   const languages = ['All', 'TypeScript', 'Rust', 'Python', 'Go', 'C++'];
 
-  const filteredRepos = REPOSITORIES.filter((repo) => {
+  const filteredRepos = repos.filter((repo) => {
     const matchesSearch =
       repo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      repo.description.toLowerCase().includes(searchTerm.toLowerCase());
+      repo.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      repo.primaryRisk.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesLang = selectedLang === 'All' || repo.language === selectedLang;
     return matchesSearch && matchesLang;
   });
@@ -84,6 +117,17 @@ export const DigitalGraveyard: React.FC<DigitalGraveyardProps> = ({ onSelectRepo
                 {lang}
               </button>
             ))}
+
+            <button
+              type="button"
+              className="filter-btn"
+              onClick={loadRepos}
+              title="Refresh repository list from local engine"
+              style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+            >
+              <RefreshCw size={12} className={isLoading ? 'spin-icon' : ''} />
+              <span>{isLoading ? 'Syncing...' : 'Sync'}</span>
+            </button>
           </div>
         </div>
 
@@ -103,66 +147,79 @@ export const DigitalGraveyard: React.FC<DigitalGraveyardProps> = ({ onSelectRepo
             <tbody>
               {filteredRepos.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted)' }}>
-                    No repositories matched your search query.
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
+                    No repositories match your filter query.
                   </td>
                 </tr>
               ) : (
                 filteredRepos.map((repo) => (
-                  <tr key={repo.id}>
+                  <tr key={repo.id} className="project-row">
                     <td>
-                      <div className="repo-identity">
-                        <span className="repo-name-text">
-                          <FolderGit2 size={16} className="text-accent" />
-                          <span>{repo.name}</span>
-                        </span>
-                        <span className="repo-path-text">{repo.path}</span>
+                      <div className="repo-name-cell">
+                        <FolderGit2 size={16} className="repo-icon" aria-hidden="true" />
+                        <div>
+                          <div className="repo-title">
+                            {repo.name}
+                            {repo.description.includes('[DEMO FIXTURE]') && (
+                              <span className="mono text-xs" style={{ marginLeft: 6, opacity: 0.6 }}>[DEMO]</span>
+                            )}
+                          </div>
+                          <div className="repo-path">{repo.path}</div>
+                        </div>
                       </div>
                     </td>
 
                     <td>
-                      <span className="lang-pill">
-                        <span className={`lang-dot ${getLangDotClass(repo.language)}`} />
+                      <span className="lang-badge">
+                        <span className={`lang-dot ${getLangDotClass(repo.language)}`} aria-hidden="true" />
                         <span>{repo.language}</span>
                       </span>
                     </td>
 
                     <td>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)' }}>
-                        <Clock size={13} className="text-muted" />
+                      <div className="activity-cell">
+                        <Clock size={13} className="text-muted" aria-hidden="true" />
                         <span>{repo.lastActivity}</span>
+                        <span className="activity-days">({repo.daysInactive}d inactive)</span>
+                      </div>
+                    </td>
+
+                    <td>
+                      <span className="tasks-count">
+                        <strong>{repo.unfinishedTasksCount}</strong> tasks identified
                       </span>
                     </td>
 
                     <td>
-                      <div className="tasks-count-cell">
-                        <span className="task-alert">{repo.unfinishedTasksCount} tasks</span>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                          {' '}· {repo.stashesCount} stashes
-                        </span>
-                      </div>
+                      {getStatusBadge(repo.status)}
                     </td>
 
-                    <td>{getStatusBadge(repo.status)}</td>
-
-                    <td>
-                      <div className="table-actions">
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => onSelectRepo(repo.id)}
-                          aria-label={`Resurrect repository ${repo.name}`}
-                        >
-                          <span>Resurrect</span>
-                          <ArrowRight size={13} />
-                        </button>
-                      </div>
+                    <td style={{ textAlign: 'right' }}>
+                      <button
+                        type="button"
+                        className="btn-select-repo"
+                        onClick={() => onSelectRepo(repo.id)}
+                        aria-label={`Inspect resurrection report for ${repo.name}`}
+                      >
+                        <span>Inspect</span>
+                        <ArrowRight size={13} />
+                      </button>
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Footer Meta */}
+        <div className="graveyard-footer-meta">
+          <span>
+            {filteredRepos.length} repositories listed · {backendConnected ? 'Live Local Git Engine Connected' : 'Local Archive'}
+          </span>
+          <span className="mono text-muted text-xs">
+            AST CACHE: READY · 0 EXTERNAL CONNECTIONS
+          </span>
         </div>
       </div>
     </section>

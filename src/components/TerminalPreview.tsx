@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
 import './TerminalPreview.css';
 import { Copy, Check, Terminal as TerminalIcon, Sparkles, FileSearch } from 'lucide-react';
+import { executeTerminalCommand } from '../services/api';
+
+interface TerminalLine {
+  text: string;
+  type: 'ok' | 'info' | 'warn' | 'error' | 'evidence' | 'command' | 'plain' | 'comment' | 'success' | 'todo' | 'diff-add' | 'diff-remove';
+}
 
 export const TerminalPreview: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'scan' | 'interactive' | 'evidence'>('scan');
   const [copied, setCopied] = useState(false);
   const [inputVal, setInputVal] = useState('');
-  const [history, setHistory] = useState<string[]>([
-    '# Type a command or click a quick action above.',
-    '# Try: phantom scan, phantom todos, phantom resurrect, or help'
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [lines, setLines] = useState<TerminalLine[]>([
+    { text: '# PHANTOM Controlled Forensic Terminal — Connected to Local Engine', type: 'comment' },
+    { text: '# Type a command or click a quick action below.', type: 'comment' },
+    { text: '# Safe commands: status, history, todos, stashes, diff, ask, report, help', type: 'info' },
   ]);
 
   const copyTerminalOutput = () => {
@@ -26,75 +34,38 @@ export const TerminalPreview: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleRunCommand = (cmd: string) => {
+  const handleRunCommand = async (cmd: string) => {
     const trimmed = cmd.trim();
-    if (!trimmed) return;
+    if (!trimmed || isExecuting) return;
+
+    // Echo command
+    setLines((prev) => [...prev, { text: `$ ${trimmed}`, type: 'command' }]);
+    setInputVal('');
 
     if (trimmed === 'clear') {
-      setHistory([]);
+      setLines([]);
       return;
     }
 
-    let responseLines: string[] = [];
-    if (trimmed.includes('scan')) {
-      responseLines = [
-        `$ ${trimmed}`,
-        '[OK] Discovered repository: git://local/nexus-auth-v2',
-        '[OK] Head commit: 9f2a71d "wip: handle token rotation edge case"',
-        '[OK] Parsed 14 TypeScript AST modules in 420ms',
-        '[WARN] Found 3 dangling stashes with unmerged auth changes',
-        '[INFO] Vectorizing git diffs for local retrieval...',
-        '> Project graph reconstructed. Run "phantom resurrect" to view blueprint.'
-      ];
-    } else if (trimmed.includes('todos')) {
-      responseLines = [
-        `$ ${trimmed}`,
-        '[TODO:HIGH] src/auth/provider.ts:142 // FIXME: burned refreshToken desync bug',
-        '[TODO:HIGH] src/storage/vault.ts:68 // TODO: encrypt session with AES-GCM (currently raw localStorage)',
-        '[TODO:MED] src/tokens/jwt.rs:88 // TODO: verify RS256 signature before trusting claims',
-        '[TODO:LOW] src/passkeys/webauthn.ts:215 // Reconstruct note: navigator.credentials requires HTTPS'
-      ];
-    } else if (trimmed.includes('resurrect')) {
-      responseLines = [
-        `$ ${trimmed}`,
-        '[INFO] Synthesizing project recovery blueprint with Llama 3.2 3B...',
-        '[OK] Root abandonment cause: OAuth refresh token race at 4:45 AM on 2024-03-18',
-        '[OK] Generated 4-step remediation plan in ./phantom-recovery.md',
-        '  Step 1: git stash branch resurrect/storage-vault stash@{0}',
-        '  Step 2: npx phantom patch --fix-jwt-v5',
-        '  Step 3: phantom apply-recipe atomic-refresh-mutex',
-        '  Step 4: npm test'
-      ];
-    } else if (trimmed.includes('diff')) {
-      responseLines = [
-        `$ ${trimmed}`,
-        'diff --git a/src/storage/vault.ts b/src/storage/vault.ts',
-        '--- a/src/storage/vault.ts',
-        '+++ b/src/storage/vault.ts',
-        '+ export async function saveEncryptedSession(token: VaultToken) {',
-        '+   // Temporary plain storage fallback',
-        '+   localStorage.setItem("__temp_session", JSON.stringify(token));',
-        '+ }'
-      ];
-    } else if (trimmed === 'help') {
-      responseLines = [
-        `$ ${trimmed}`,
-        'Available PHANTOM CLI commands:',
-        '  phantom scan <path>       - Index repository, parse AST, and identify stashes',
-        '  phantom todos             - Surface unresolved TODOs, FIXMEs, and dead code',
-        '  phantom resurrect         - Generate structured revival plan & patch scripts',
-        '  phantom diff --stash=<n>  - Inspect uncommitted stashed evidence',
-        '  clear                     - Reset terminal window'
-      ];
-    } else {
-      responseLines = [
-        `$ ${trimmed}`,
-        `phantom: command not recognized: "${trimmed}". Type "help" for available options.`
-      ];
+    setIsExecuting(true);
+    try {
+      // Execute via controlled backend command parser
+      const res = await executeTerminalCommand(trimmed);
+      if (res.clear) {
+        setLines([]);
+      } else if (res.lines && res.lines.length > 0) {
+        setLines((prev) => [...prev, ...res.lines]);
+      }
+    } catch {
+      // Local fallback parsing if backend isn't reached yet
+      setLines((prev) => [
+        ...prev,
+        { text: `[INFO] Executing in offline fallback mode...`, type: 'info' },
+        { text: `To enable live git forensics, ensure phantom server is running on :3001.`, type: 'warn' },
+      ]);
+    } finally {
+      setIsExecuting(false);
     }
-
-    setHistory((prev) => [...prev, ...responseLines]);
-    setInputVal('');
   };
 
   return (
@@ -114,13 +85,13 @@ export const TerminalPreview: React.FC = () => {
               <span className="terminal-dot terminal-dot-min" />
               <span className="terminal-dot terminal-dot-max" />
               <span className="terminal-title" style={{ marginLeft: 8 }}>
-                phantom://<span className="domain">repository-analysis</span>
+                phantom://<span className="domain">repository-forensics-terminal</span>
               </span>
             </div>
 
             <div className="terminal-meta-actions">
-              <span className="terminal-badge-demo" title="This panel showcases the local developer CLI experience">
-                DEMONSTRATION RUNTIME · LOCAL MOCK
+              <span className="terminal-badge-demo" title="Controlled terminal command parser executing only safe forensic routines">
+                SAFE CONTROLLED RUNTIME · NO SHELL INJECTION
               </span>
               <button
                 type="button"
@@ -154,7 +125,7 @@ export const TerminalPreview: React.FC = () => {
               onClick={() => setActiveTab('interactive')}
             >
               <Sparkles size={13} />
-              <span>Interactive CLI</span>
+              <span>Live Controlled CLI</span>
             </button>
             <button
               type="button"
@@ -176,40 +147,60 @@ export const TerminalPreview: React.FC = () => {
               className="quick-pill"
               onClick={() => {
                 setActiveTab('interactive');
-                handleRunCommand('phantom scan ./nexus-auth-v2');
+                handleRunCommand('status');
               }}
             >
-              $ phantom scan
+              $ status
             </button>
             <button
               type="button"
               className="quick-pill"
               onClick={() => {
                 setActiveTab('interactive');
-                handleRunCommand('phantom todos --unresolved');
+                handleRunCommand('history 5');
               }}
             >
-              $ phantom todos
+              $ history
             </button>
             <button
               type="button"
               className="quick-pill"
               onClick={() => {
                 setActiveTab('interactive');
-                handleRunCommand('phantom resurrect --dry-run');
+                handleRunCommand('todos');
               }}
             >
-              $ phantom resurrect
+              $ todos
             </button>
             <button
               type="button"
               className="quick-pill"
               onClick={() => {
                 setActiveTab('interactive');
-                handleRunCommand('phantom diff --stash=0');
+                handleRunCommand('stashes');
               }}
             >
-              $ phantom diff
+              $ stashes
+            </button>
+            <button
+              type="button"
+              className="quick-pill"
+              onClick={() => {
+                setActiveTab('interactive');
+                handleRunCommand('report');
+              }}
+            >
+              $ report
+            </button>
+            <button
+              type="button"
+              className="quick-pill"
+              onClick={() => {
+                setActiveTab('interactive');
+                handleRunCommand('help');
+              }}
+            >
+              $ help
             </button>
             <button
               type="button"
@@ -271,49 +262,67 @@ export const TerminalPreview: React.FC = () => {
           {/* Tab Content 2: Interactive CLI */}
           {activeTab === 'interactive' && (
             <div className="terminal-body" tabIndex={0} aria-label="Interactive CLI console">
-              {history.map((line, idx) => {
-                const isCmd = line.startsWith('$');
-                const isComment = line.startsWith('#');
-                const isOk = line.includes('[OK]');
-                const isWarn = line.includes('[WARN]');
-                const isInfo = line.includes('[INFO]');
-                const isTodo = line.includes('[TODO');
+              {lines.map((l, idx) => {
+                const isCmd = l.type === 'command';
+                const isComment = l.type === 'comment';
+                const isOk = l.type === 'ok' || l.type === 'success';
+                const isWarn = l.type === 'warn';
+                const isInfo = l.type === 'info';
+                const isError = l.type === 'error';
+                const isTodo = l.type === 'todo';
+                const isDiffAdd = l.type === 'diff-add';
+                const isDiffRemove = l.type === 'diff-remove';
+                const isEvidence = l.type === 'evidence';
 
                 return (
                   <div key={idx} className="terminal-line">
                     {isCmd && (
                       <>
                         <span className="terminal-prompt">$</span>
-                        <span className="terminal-command">{line.slice(2)}</span>
+                        <span className="terminal-command">{l.text.replace(/^\$\s*/, '')}</span>
                       </>
                     )}
-                    {isComment && <span className="terminal-comment">{line}</span>}
+                    {isComment && <span className="terminal-comment">{l.text}</span>}
                     {isOk && (
                       <>
                         <span className="terminal-log-ok">[OK]</span>
-                        <span>{line.replace('[OK]', '')}</span>
+                        <span> {l.text.replace(/^\[?OK\]?\s*/i, '')}</span>
                       </>
                     )}
                     {isWarn && (
                       <>
                         <span className="terminal-log-warn">[WARN]</span>
-                        <span>{line.replace('[WARN]', '')}</span>
+                        <span> {l.text.replace(/^\[?WARN\]?\s*/i, '')}</span>
                       </>
                     )}
                     {isInfo && (
                       <>
                         <span className="terminal-log-info">[INFO]</span>
-                        <span>{line.replace('[INFO]', '')}</span>
+                        <span> {l.text.replace(/^\[?INFO\]?\s*/i, '')}</span>
+                      </>
+                    )}
+                    {isError && (
+                      <>
+                        <span style={{ color: 'var(--danger, #ff4444)' }}>[ERROR]</span>
+                        <span> {l.text.replace(/^\[?ERROR\]?\s*/i, '')}</span>
                       </>
                     )}
                     {isTodo && (
                       <>
-                        <span className="terminal-log-warn">{line.split(' ')[0]}</span>
-                        <span className="terminal-highlight"> {line.split(' ').slice(1).join(' ')}</span>
+                        <span className="terminal-log-warn">[TODO]</span>
+                        <span className="terminal-highlight"> {l.text.replace(/^\[?TODO\]?\s*/i, '')}</span>
                       </>
                     )}
-                    {!isCmd && !isComment && !isOk && !isWarn && !isInfo && !isTodo && (
-                      <span>{line}</span>
+                    {isEvidence && (
+                      <>
+                        <span className="terminal-log-evidence">[EVIDENCE]</span>
+                        <span> {l.text.replace(/^\[?EVIDENCE\]?\s*/i, '')}</span>
+                      </>
+                    )}
+                    {isDiffAdd && <span style={{ color: 'var(--accent)' }}>{l.text}</span>}
+                    {isDiffRemove && <span style={{ color: 'var(--danger, #ff4444)' }}>{l.text}</span>}
+                    {!isCmd && !isComment && !isOk && !isWarn && !isInfo && !isError && !isTodo && !isEvidence && !isDiffAdd && !isDiffRemove && (
+                      <span>{l.text}</span>
                     )}
                   </div>
                 );
@@ -332,7 +341,8 @@ export const TerminalPreview: React.FC = () => {
                   className="terminal-input"
                   value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
-                  placeholder="type 'phantom scan', 'todos', 'resurrect', or 'help'..."
+                  disabled={isExecuting}
+                  placeholder="type 'status', 'history', 'todos', 'ask <q>', or 'help'..."
                   aria-label="Terminal command prompt"
                 />
                 <span className="terminal-cursor" aria-hidden="true" />

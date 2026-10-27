@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './LaunchModal.css';
 import { REPOSITORIES } from '../data/mockData';
-import { X, Terminal, Play, CheckCircle2, Send, Sparkles } from 'lucide-react';
+import { X, Terminal, Play, CheckCircle2, Send, Sparkles, AlertCircle } from 'lucide-react';
+import {
+  fetchOllamaStatus,
+  streamRepositoryScan,
+  askForensicsAI,
+  type OllamaModelInfo,
+} from '../services/api';
 
 interface LaunchModalProps {
   isOpen: boolean;
@@ -12,24 +18,47 @@ interface LaunchModalProps {
 export const LaunchModal: React.FC<LaunchModalProps> = ({
   isOpen,
   onClose,
-  onResurrectComplete
+  onResurrectComplete,
 }) => {
   const [selectedRepo, setSelectedRepo] = useState<string>('nexus-auth-v2');
   const [customPath, setCustomPath] = useState<string>('');
-  const [selectedModel, setSelectedModel] = useState<string>('llama-3.2-3b');
+  const [selectedModel, setSelectedModel] = useState<string>('llama3.2');
+  const [availableModels, setAvailableModels] = useState<OllamaModelInfo[]>([]);
+  const [ollamaRunning, setOllamaRunning] = useState<boolean>(false);
+  const [ollamaNotice, setOllamaNotice] = useState<string>('');
+
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
   const [scanLogs, setScanLogs] = useState<string[]>([]);
   const [isFinished, setIsFinished] = useState(false);
+  const [scannedRepoId, setScannedRepoId] = useState<string | null>(null);
 
   // Q&A state
   const [qaInput, setQaInput] = useState('');
-  const [qaHistory, setQaHistory] = useState<{ role: 'user' | 'ai'; text: string }[]>([
+  const [isAnswering, setIsAnswering] = useState(false);
+  const [qaHistory, setQaHistory] = useState<{ role: 'user' | 'ai'; text: string; evidence?: string[] }[]>([
     {
       role: 'ai',
-      text: 'Local AI archaeologist initialized. Ask any question regarding git commits, unmerged stashes, or why this codebase was abandoned.'
-    }
+      text: 'Local AI archaeologist initialized. Ask any question regarding git commits, unmerged stashes, or why this codebase was abandoned.',
+    },
   ]);
+
+  // Discover local Ollama models on modal open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    fetchOllamaStatus().then((status) => {
+      setOllamaRunning(status.available);
+      if (status.available && status.models.length > 0) {
+        setAvailableModels(status.models);
+        setSelectedModel(status.models[0].name);
+        setOllamaNotice('');
+      } else {
+        setAvailableModels([]);
+        setOllamaNotice(status.error || 'Ollama is offline. Start with `ollama serve`.');
+      }
+    });
+  }, [isOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -44,69 +73,86 @@ export const LaunchModal: React.FC<LaunchModalProps> = ({
   if (!isOpen) return null;
 
   const handleStartScan = () => {
+    const targetPath = customPath.trim() || '.';
     setIsScanning(true);
-    setScanProgress(10);
+    setScanProgress(5);
     setIsFinished(false);
-    setScanLogs(['[INIT] Connecting to local git rev-list engine...']);
+    setScanLogs([`[INIT] Validating repository path: "${targetPath}"...`]);
 
-    setTimeout(() => {
-      setScanProgress(35);
-      setScanLogs((prev) => [
-        ...prev,
-        '[OK] Discovered 83 commits & 4 branches.',
-        '[INFO] Parsing AST for 14 TypeScript files...'
-      ]);
-    }, 600);
+    const stopStream = streamRepositoryScan(
+      targetPath,
+      (event) => {
+        setScanProgress(event.progress);
+        const logPrefix =
+          event.phase === 'error'
+            ? '[WARN]'
+            : event.phase === 'complete'
+            ? '[SUCCESS]'
+            : event.phase === 'validating'
+            ? '[INFO]'
+            : '[OK]';
 
-    setTimeout(() => {
-      setScanProgress(70);
-      setScanLogs((prev) => [
-        ...prev,
-        '[WARN] Found uncommitted stash@{0} with WebCrypto placeholder.',
-        '[INFO] Vectorizing commit diffs for local Llama 3.2 3B context...'
-      ]);
-    }, 1300);
+        setScanLogs((prev) => [...prev, `${logPrefix} ${event.message}`]);
 
-    setTimeout(() => {
-      setScanProgress(100);
-      setIsScanning(false);
-      setIsFinished(true);
-      setScanLogs((prev) => [
-        ...prev,
-        '[SUCCESS] Project archaeological reconstruction complete!',
-        '> Ground truth blueprint synthesized in 1.82s.'
-      ]);
-    }, 2100);
+        if (event.phase === 'complete' && event.detail) {
+          try {
+            const parsed = JSON.parse(event.detail);
+            setScannedRepoId(parsed.id);
+          } catch {}
+        }
+      },
+      (errorMsg) => {
+        setIsScanning(false);
+        setScanLogs((prev) => [...prev, `[WARN] Scan error: ${errorMsg}`]);
+      },
+      () => {
+        setIsScanning(false);
+        setIsFinished(true);
+        setScanLogs((prev) => [
+          ...prev,
+          '> Ground truth blueprint synthesized via local Git forensics.',
+        ]);
+      }
+    );
+
+    return () => stopStream();
   };
 
-  const handleSendQa = (e: React.FormEvent) => {
+  const handleSendQa = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!qaInput.trim()) return;
+    if (!qaInput.trim() || isAnswering) return;
 
     const question = qaInput.trim();
     const newHistory = [...qaHistory, { role: 'user' as const, text: question }];
     setQaHistory(newHistory);
     setQaInput('');
+    setIsAnswering(true);
 
-    // Local AI rule-based evidence responses
-    setTimeout(() => {
-      let answer = '';
-      const qLower = question.toLowerCase();
-      if (qLower.includes('why') || qLower.includes('abandon')) {
-        answer =
-          'Evidence indicates the project was halted on March 18, 2024 at 4:45 AM due to a token desynchronization bug during offline mode (see src/auth/provider.ts:142) and an unmerged JWT v5 bump.';
-      } else if (qLower.includes('stash') || qLower.includes('secret')) {
-        answer =
-          'CRITICAL: Stash stash@{0} contains plaintext session tokens saved to localStorage under "__temp_session" as a temporary AES-GCM placeholder. Fix command: "phantom fix --security-sanitize-stash 0".';
-      } else if (qLower.includes('next') || qLower.includes('resurrect')) {
-        answer =
-          'Recommended first step: Branch off the stashed vault work with "git stash branch resurrect/storage-vault stash@{0}", then apply the AST compatibility patch for JWT v5.';
-      } else {
-        answer = `Analysis of ${selectedRepo}: Discovered 14 unresolved tasks across 4 branches. High confidence match on commit 9f2a71d as the stalling point.`;
-      }
+    const repoId = scannedRepoId || 'nexus-auth-v2';
 
-      setQaHistory((prev) => [...prev, { role: 'ai', text: answer }]);
-    }, 450);
+    try {
+      const response = await askForensicsAI(repoId, question, selectedModel);
+      const evidenceSnippets = response.evidence.map((ev) => `↳ [${ev.type.toUpperCase()}] ${ev.reference}`);
+
+      setQaHistory((prev) => [
+        ...prev,
+        {
+          role: 'ai',
+          text: response.answer,
+          evidence: evidenceSnippets,
+        },
+      ]);
+    } catch (err: any) {
+      setQaHistory((prev) => [
+        ...prev,
+        {
+          role: 'ai',
+          text: `Forensic inquiry notice: ${err.message || 'Could not resolve query'}. Ground truth repository evidence is active.`,
+        },
+      ]);
+    } finally {
+      setIsAnswering(false);
+    }
   };
 
   return (
@@ -134,11 +180,23 @@ export const LaunchModal: React.FC<LaunchModalProps> = ({
           <div className="config-row">
             <label className="config-label">1. Select Target Git Repository</label>
             <div className="repo-options-grid">
-              {REPOSITORIES.slice(0, 3).map((repo) => (
+              <button
+                type="button"
+                className={`repo-option-btn ${customPath === '.' || (!customPath && selectedRepo === 'current') ? 'selected' : ''}`}
+                onClick={() => {
+                  setCustomPath('.');
+                  setSelectedRepo('current');
+                }}
+              >
+                <span className="repo-opt-name">This Workspace (Active)</span>
+                <span className="repo-opt-meta">Local Git · Working Tree</span>
+              </button>
+
+              {REPOSITORIES.slice(0, 2).map((repo) => (
                 <button
                   key={repo.id}
                   type="button"
-                  className={`repo-option-btn ${selectedRepo === repo.id ? 'selected' : ''}`}
+                  className={`repo-option-btn ${selectedRepo === repo.id && !customPath ? 'selected' : ''}`}
                   onClick={() => {
                     setSelectedRepo(repo.id);
                     setCustomPath('');
@@ -153,7 +211,7 @@ export const LaunchModal: React.FC<LaunchModalProps> = ({
             <input
               type="text"
               className="custom-path-input"
-              placeholder="Or enter custom local path (e.g., ~/Developer/projects/my-repo)..."
+              placeholder="Or enter custom local path (e.g., /path/to/my-repo or .)..."
               value={customPath}
               onChange={(e) => {
                 setCustomPath(e.target.value);
@@ -165,30 +223,58 @@ export const LaunchModal: React.FC<LaunchModalProps> = ({
 
           {/* Local Model Picker */}
           <div className="config-row">
-            <label className="config-label">2. Select On-Device Open-Weight LLM</label>
-            <div className="model-select-chips">
-              <button
-                type="button"
-                className={`model-chip ${selectedModel === 'llama-3.2-3b' ? 'selected' : ''}`}
-                onClick={() => setSelectedModel('llama-3.2-3b')}
-              >
-                Llama 3.2 3B (Fast · 2.4 GB)
-              </button>
-              <button
-                type="button"
-                className={`model-chip ${selectedModel === 'qwen-2.5-coder-7b' ? 'selected' : ''}`}
-                onClick={() => setSelectedModel('qwen-2.5-coder-7b')}
-              >
-                Qwen 2.5 Coder 7B (Deep · 5.2 GB)
-              </button>
-              <button
-                type="button"
-                className={`model-chip ${selectedModel === 'deepseek-coder-6.7b' ? 'selected' : ''}`}
-                onClick={() => setSelectedModel('deepseek-coder-6.7b')}
-              >
-                DeepSeek-Coder 6.7B (AST · 4.8 GB)
-              </button>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+              <label className="config-label" style={{ margin: 0 }}>2. Select On-Device Open-Weight LLM</label>
+              <span className="mono text-xs" style={{ color: ollamaRunning ? 'var(--accent)' : 'var(--warning)' }}>
+                {ollamaRunning ? `● OLLAMA CONNECTED (${availableModels.length} models)` : '○ OLLAMA OFFLINE (FALLBACK EVIDENCE MODE)'}
+              </span>
             </div>
+
+            {ollamaRunning && availableModels.length > 0 ? (
+              <div className="model-select-chips">
+                {availableModels.map((m) => (
+                  <button
+                    key={m.name}
+                    type="button"
+                    className={`model-chip ${selectedModel === m.name ? 'selected' : ''}`}
+                    onClick={() => setSelectedModel(m.name)}
+                  >
+                    {m.name} ({m.sizeFormatted})
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="model-select-chips">
+                <button
+                  type="button"
+                  className={`model-chip ${selectedModel === 'llama-3.2-3b' ? 'selected' : ''}`}
+                  onClick={() => setSelectedModel('llama-3.2-3b')}
+                >
+                  Llama 3.2 3B (Fast · 2.4 GB)
+                </button>
+                <button
+                  type="button"
+                  className={`model-chip ${selectedModel === 'qwen-2.5-coder-7b' ? 'selected' : ''}`}
+                  onClick={() => setSelectedModel('qwen-2.5-coder-7b')}
+                >
+                  Qwen 2.5 Coder 7B (Deep · 5.2 GB)
+                </button>
+                <button
+                  type="button"
+                  className={`model-chip ${selectedModel === 'deepseek-coder-6.7b' ? 'selected' : ''}`}
+                  onClick={() => setSelectedModel('deepseek-coder-6.7b')}
+                >
+                  DeepSeek-Coder 6.7B (AST · 4.8 GB)
+                </button>
+              </div>
+            )}
+
+            {!ollamaRunning && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                <AlertCircle size={12} color="var(--warning)" />
+                <span>{ollamaNotice || 'Ollama not detected on port 11434. Factual git forensics and TODO scanning remain 100% active. Run `ollama serve` for neural inference.'}</span>
+              </div>
+            )}
           </div>
 
           {/* Action to trigger scan */}
@@ -239,7 +325,7 @@ export const LaunchModal: React.FC<LaunchModalProps> = ({
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <label className="config-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <Sparkles size={14} className="text-accent" />
-                  <span>Evidence-Backed Repository Q&A (Local Model)</span>
+                  <span>Evidence-Backed Repository Q&A ({ollamaRunning ? selectedModel : 'Forensic Fact Engine'})</span>
                 </label>
                 <span className="mono text-xs text-accent">AIR-GAPPED</span>
               </div>
@@ -250,10 +336,22 @@ export const LaunchModal: React.FC<LaunchModalProps> = ({
                     key={idx}
                     className={item.role === 'user' ? 'qa-message-user' : 'qa-message-ai'}
                   >
-                    <strong>{item.role === 'user' ? 'YOU: ' : 'PHANTOM AI: '}</strong>
-                    {item.text}
+                    <strong>{item.role === 'user' ? 'YOU: ' : 'PHANTOM: '}</strong>
+                    <div style={{ whiteSpace: 'pre-wrap', marginTop: 2 }}>{item.text}</div>
+                    {item.evidence && item.evidence.length > 0 && (
+                      <div style={{ marginTop: 6, fontSize: '0.72rem', color: 'var(--accent)', opacity: 0.85 }}>
+                        {item.evidence.map((ev, eIdx) => (
+                          <div key={eIdx}>{ev}</div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
+                {isAnswering && (
+                  <div className="qa-message-ai">
+                    <em>Analyzing git commit diffs and source TODOs...</em>
+                  </div>
+                )}
               </div>
 
               <form className="qa-input-bar" onSubmit={handleSendQa}>
@@ -263,9 +361,10 @@ export const LaunchModal: React.FC<LaunchModalProps> = ({
                   placeholder="Ask e.g.: 'Why was this project abandoned?' or 'Check stashes for bugs'..."
                   value={qaInput}
                   onChange={(e) => setQaInput(e.target.value)}
+                  disabled={isAnswering}
                   aria-label="Ask questions to local AI"
                 />
-                <button type="submit" className="btn btn-secondary btn-sm" aria-label="Submit question">
+                <button type="submit" className="btn btn-secondary btn-sm" disabled={isAnswering || !qaInput.trim()} aria-label="Submit question">
                   <Send size={13} />
                 </button>
               </form>
@@ -284,7 +383,7 @@ export const LaunchModal: React.FC<LaunchModalProps> = ({
               type="button"
               className="btn btn-primary btn-sm"
               onClick={() => {
-                onResurrectComplete(selectedRepo);
+                onResurrectComplete(scannedRepoId || selectedRepo);
                 onClose();
               }}
             >

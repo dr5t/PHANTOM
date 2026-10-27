@@ -54,7 +54,9 @@ function retrieveEvidence(repo: AnalyzedRepository, question: string): Discovere
       if (fileLower.includes(word)) score += 2;
     }
 
-    if (todo.priority === 'high') score += 1;
+    if (score > 0 && todo.priority === 'high') {
+      score += 1;
+    }
 
     if (score > 0) {
       evidence.push({

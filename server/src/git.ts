@@ -15,8 +15,8 @@ export async function getCommitHistory(
 ): Promise<GitCommit[]> {
   try {
     // Delimiter for parsing commit metadata
-    // Format: Hash%x1fShortHash%x1fAuthor%x1fEmail%x1fDateIso%x1fTimestamp%x1fSubject
-    const format = '%H%x1f%h%x1f%an%x1f%ae%x1f%aI%x1f%at%x1f%s';
+    // Use %x1e (Record Separator) before each commit and %x1f (Unit Separator) between fields
+    const format = '%x1e%H%x1f%h%x1f%an%x1f%ae%x1f%aI%x1f%at%x1f%s';
     const { stdout } = await execGit(
       ['log', `-${limit}`, `--format=${format}`, '--shortstat'],
       repoPath
@@ -27,10 +27,11 @@ export async function getCommitHistory(
     }
 
     const commits: GitCommit[] = [];
-    const entries = stdout.split('\n\n');
+    // Split by record separator
+    const rawBlocks = stdout.split('\x1e').map((b) => b.trim()).filter(Boolean);
 
-    for (const entry of entries) {
-      const lines = entry.trim().split('\n');
+    for (const block of rawBlocks) {
+      const lines = block.split('\n');
       if (lines.length === 0 || !lines[0]) continue;
 
       const metaParts = lines[0].split('\x1f');
@@ -43,7 +44,7 @@ export async function getCommitHistory(
       let insertions = 0;
       let deletions = 0;
 
-      // Check for shortstat line (second line or later)
+      // Check for shortstat line (subsequent lines)
       const statLine = lines.find((l) => l.includes('changed'));
       if (statLine) {
         const fileMatch = statLine.match(/(\d+)\s+file/);
@@ -85,7 +86,7 @@ export async function getCommitHistory(
 export async function getBranches(repoPath: string): Promise<GitBranch[]> {
   try {
     const { stdout } = await execGit(
-      ['branch', '-a', '--format=%(refname:short)%x1f%(HEAD)%x1f%(objectname:short)%x1f%(committerdate:iso)'],
+      ['branch', '-a', '--format=%(refname:short)|%(HEAD)|%(objectname:short)|%(committerdate:iso)'],
       repoPath
     );
 
@@ -95,7 +96,7 @@ export async function getBranches(repoPath: string): Promise<GitBranch[]> {
     const lines = stdout.trim().split('\n');
 
     for (const line of lines) {
-      const parts = line.split('\x1f');
+      const parts = line.split('|');
       if (parts.length < 4) continue;
 
       const [name, headMarker, lastCommitHash, lastCommitDate] = parts;
