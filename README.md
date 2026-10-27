@@ -20,22 +20,25 @@
 </p>
 
 <p align="center">
-  <a href="#-overview">Overview</a> •
-  <a href="#-the-problem-software-archaeology">The Problem</a> •
-  <a href="#-features--implementation-status">Features & Status</a> •
-  <a href="#-application-walkthrough--screenshots">Screenshots</a> •
-  <a href="#-architecture">Architecture</a> •
-  <a href="#-technology-stack">Tech Stack</a> •
-  <a href="#-getting-started">Getting Started</a> •
-  <a href="#-local-ai-setup-optional">Ollama Setup</a> •
-  <a href="#-security-and-privacy-notes">Security & Privacy</a> •
-  <a href="#-creator">Creator</a> •
-  <a href="#-license">License</a>
+  <a href="#overview">Overview</a> •
+  <a href="#the-problem-software-archaeology">The Problem</a> •
+  <a href="#features--implementation-status">Features & Status</a> •
+  <a href="#application-walkthrough--screenshots">Screenshots</a> •
+  <a href="#architecture">Architecture</a> •
+  <a href="#technology-stack">Tech Stack</a> •
+  <a href="#getting-started">Getting Started</a> •
+  <a href="#testing-and-builds">Testing & Builds</a> •
+  <a href="#local-ai-setup-optional">Ollama Setup</a> •
+  <a href="#security-and-privacy-notes">Security & Privacy</a> •
+  <a href="#repository-structure">Repository</a> •
+  <a href="#creator">Creator</a> •
+  <a href="#license">License</a>
 </p>
 
 ---
 
-## 📖 Overview
+<a id="overview"></a>
+## <img src="docs/assets/icons/overview.svg" width="22" height="22" alt="" valign="middle"> Overview
 
 **PHANTOM** is a developer tool built to inspect existing and dormant Git codebases, extract chronological project history, surface unresolved comments and uncommitted stashes, and generate structured recovery reports. 
 
@@ -43,7 +46,8 @@ When connected to a local [Ollama](https://ollama.com) runtime, PHANTOM performs
 
 ---
 
-## 🔍 The Problem: Software Archaeology
+<a id="the-problem-software-archaeology"></a>
+## <img src="docs/assets/icons/investigation.svg" width="22" height="22" alt="" valign="middle"> The Problem: Software Archaeology
 
 Every developer has inherited unfamiliar code or revisited a project abandoned months ago:
 
@@ -56,7 +60,8 @@ PHANTOM addresses this by treating the repository itself as the primary archaeol
 
 ---
 
-## ✨ Features & Implementation Status
+<a id="features--implementation-status"></a>
+## <img src="docs/assets/icons/features.svg" width="22" height="22" alt="" valign="middle"> Features & Implementation Status
 
 To provide transparent documentation, the table below distinguishes between features verified end-to-end against live repositories and demonstration fixtures provided for UI exploration:
 
@@ -78,7 +83,8 @@ To provide transparent documentation, the table below distinguishes between feat
 
 ---
 
-## 📸 Application Walkthrough & Screenshots
+<a id="application-walkthrough--screenshots"></a>
+## <img src="docs/assets/icons/screenshots.svg" width="22" height="22" alt="" valign="middle"> Application Walkthrough & Screenshots
 
 These screenshots represent the actual running application connected to its local forensics server:
 
@@ -108,7 +114,8 @@ These screenshots represent the actual running application connected to its loca
 
 ---
 
-## 🏛️ Architecture
+<a id="architecture"></a>
+## <img src="docs/assets/icons/architecture.svg" width="22" height="22" alt="" valign="middle"> Architecture
 
 ```mermaid
 flowchart TD
@@ -166,7 +173,8 @@ flowchart TD
 
 ---
 
-## 🧰 Technology Stack
+<a id="technology-stack"></a>
+## <img src="docs/assets/icons/technology.svg" width="22" height="22" alt="" valign="middle"> Technology Stack
 
 ### Frontend Client
 - **Framework**: [React 19](https://react.dev/) (`react@^19.3.1`, `react-dom@^19.3.1`)
@@ -189,7 +197,8 @@ flowchart TD
 
 ---
 
-## 🚀 Getting Started
+<a id="getting-started"></a>
+## <img src="docs/assets/icons/getting-started.svg" width="22" height="22" alt="" valign="middle"> Getting Started
 
 ### Prerequisites
 - **Node.js**: `v20.0.0` or higher
@@ -232,7 +241,8 @@ Open your browser to **`http://127.0.0.1:5173`**.
 
 ---
 
-## 🧪 Testing and Builds
+<a id="testing-and-builds"></a>
+## <img src="docs/assets/icons/testing.svg" width="22" height="22" alt="" valign="middle"> Testing and Builds
 
 All Git forensic routines, security path checks, and report generators are covered by automated tests executing against dynamically created temporary Git repositories.
 
@@ -288,7 +298,8 @@ npm run lint
 
 ---
 
-## 🤖 Local AI Setup (Optional)
+<a id="local-ai-setup-optional"></a>
+## <img src="docs/assets/icons/local-ai.svg" width="22" height="22" alt="" valign="middle"> Local AI Setup (Optional)
 
 PHANTOM's core Git analysis, source scanning, and report generation work offline without Ollama. If you wish to enable neural Q&A:
 
@@ -313,7 +324,8 @@ When active, PHANTOM's UI reflects `RUNTIME STATUS: ACTIVE` and displays your in
 
 ---
 
-## 🔒 Security and Privacy Notes
+<a id="security-and-privacy-notes"></a>
+## <img src="docs/assets/icons/security.svg" width="22" height="22" alt="" valign="middle"> Security and Privacy Notes
 
 - **Subprocess Safety**: Subprocesses are executed strictly via `child_process.execFile` with argument arrays. User input is never evaluated in a shell, eliminating command injection risks.
 - **Sensitive File Exclusion**: The scanner skips sensitive files by default, including `.env*`, `id_rsa`, `id_ed25519`, `*.pem`, `*.key`, `credentials.json`, `*secret*`, and `.git-credentials`.
@@ -324,7 +336,8 @@ When active, PHANTOM's UI reflects `RUNTIME STATUS: ACTIVE` and displays your in
 
 ---
 
-## 📁 Repository Structure
+<a id="repository-structure"></a>
+## <img src="docs/assets/icons/repository.svg" width="22" height="22" alt="" valign="middle"> Repository Structure
 
 ```
 PHANTOM/
@@ -382,7 +395,8 @@ PHANTOM/
 
 ---
 
-## 👤 Creator
+<a id="creator"></a>
+## <img src="docs/assets/icons/creator.svg" width="22" height="22" alt="" valign="middle"> Creator
 
 Created and developed by **Shaurya Tiwari** ([@dr5t](https://github.com/dr5t)).
 
@@ -391,7 +405,8 @@ Issues & Inquiries: [https://github.com/dr5t/PHANTOM/issues](https://github.com/
 
 ---
 
-## 📜 License
+<a id="license"></a>
+## <img src="docs/assets/icons/license.svg" width="22" height="22" alt="" valign="middle"> License
 
 *Notice: No license file is currently present in this repository.*
 

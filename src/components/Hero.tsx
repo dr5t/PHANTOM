@@ -60,13 +60,13 @@ export const Hero: React.FC<HeroProps> = ({ onExploreArchive, onHowItWorks }) =>
                 <ShieldCheck size={16} className="dot-green" />
                 <span>100% Local-First</span>
               </span>
-              <span className="stat-label">Zero Telemetry · Air-Gapped</span>
+              <span className="stat-label">On-Device Execution · Privacy</span>
             </div>
 
             <div className="stat-item">
               <span className="stat-value">
                 <HardDrive size={16} className="dot-green" />
-                <span>Git Stash & AST Audit</span>
+                <span>Git Stash & Source Audit</span>
               </span>
               <span className="stat-label">Dangling Blobs & WIPs</span>
             </div>

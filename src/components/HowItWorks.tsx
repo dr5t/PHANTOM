@@ -8,17 +8,17 @@ export const HowItWorks: React.FC = () => {
       number: '01 — SCAN',
       title: 'Inspect a user-selected Git repository and extract relevant artifacts.',
       description:
-        'PHANTOM crawls commit logs, dangling stashes, unmerged branches, and file ASTs. It isolates uncommitted diffs and surfaces forgotten TODO and FIXME annotations.',
+        'PHANTOM crawls commit logs, dangling stashes, unmerged branches, and source files. It isolates uncommitted diffs and surfaces forgotten TODO and FIXME annotations.',
       icon: <Search size={22} />,
-      tags: ['git rev-list', 'stash inspector', 'tree-sitter AST', 'air-gapped']
+      tags: ['git log', 'stash inspector', 'source scanner', 'local-first']
     },
     {
       number: '02 — INVESTIGATE',
       title: 'Use local retrieval and an open-weight model to analyze the available evidence.',
       description:
-        'Diff fragments and commit messages are embedded in local vector storage. An on-device open-weight model pieces together why the project stalled and reconstructs the author’s intent.',
+        'Diff fragments and commit messages are analyzed with evidence grounding. An on-device open-weight model pieces together why the project stalled and reconstructs the author’s intent.',
       icon: <BrainCircuit size={22} />,
-      tags: ['local RAG', 'Ollama / GGML', 'intent mapping', 'zero telemetry']
+      tags: ['local evidence', 'Ollama integration', 'intent mapping', 'local inference']
     },
     {
       number: '03 — RESURRECT',

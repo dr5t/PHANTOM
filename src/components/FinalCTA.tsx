@@ -8,7 +8,7 @@ interface FinalCTAProps {
 
 export const FinalCTA: React.FC<FinalCTAProps> = ({ onLaunchModal }) => {
   const [copied, setCopied] = useState(false);
-  const command = 'curl -sSL https://phantom.dev/install.sh | bash';
+  const command = 'git clone https://github.com/dr5t/PHANTOM.git';
 
   const copyCommand = () => {
     navigator.clipboard.writeText(command);
@@ -36,7 +36,7 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onLaunchModal }) => {
           </h2>
 
           <p className="final-cta-desc">
-            Reclaim lost context from abandoned branches, uncommitted stashes, and forgotten ideas. Local-first, private by design, and open source.
+            Reclaim lost context from abandoned branches, uncommitted stashes, and forgotten ideas. Local-first, private by design, and built for local analysis.
           </p>
 
           <div className="final-cta-actions">

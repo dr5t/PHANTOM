@@ -33,7 +33,7 @@ export interface MemoryEvent {
   codeSnippet?: string;
   todoText?: string;
   tags: string[];
-  isFact: boolean; // True if ground truth from git log/AST, false if AI synthesis
+  isFact: boolean; // True if ground truth from git log or source code, false if AI synthesis
   aiInterpretation?: string;
   confidenceScore: number;
 }

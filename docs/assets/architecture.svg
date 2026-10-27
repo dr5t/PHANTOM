@@ -26,7 +26,7 @@
     // SYSTEM ARCHITECTURE : LOCAL-FIRST SOFTWARE ARCHAEOLOGY
   </text>
   <text x="730" y="45" font-family="'JetBrains Mono', Consolas, monospace" font-size="12" fill="#718096">
-    AIR-GAPPED RUNTIME
+    LOCAL-FIRST RUNTIME
   </text>
 
   <!-- COLUMN 1: CLIENT FRONTEND -->
@@ -111,9 +111,9 @@
   <text x="678" y="260" font-family="'JetBrains Mono', monospace" font-size="9" fill="#00FF66">Read-only Inspections</text>
 
   <rect x="666" y="282" width="178" height="66" rx="6" fill="#0b1116" stroke="#1f2d3a"/>
-  <text x="678" y="304" font-family="sans-serif" font-size="12" font-weight="bold" fill="#ffffff">Zero-Egress Sandbox</text>
-  <text x="678" y="320" font-family="'JetBrains Mono', monospace" font-size="10" fill="#8899a6">Air-Gapped Boundaries</text>
-  <text x="678" y="336" font-family="'JetBrains Mono', monospace" font-size="9" fill="#00FF66">No Cloud Telemetry</text>
+  <text x="678" y="304" font-family="sans-serif" font-size="12" font-weight="bold" fill="#ffffff">Local Execution</text>
+  <text x="678" y="320" font-family="'JetBrains Mono', monospace" font-size="10" fill="#8899a6">On-Device Processing</text>
+  <text x="678" y="336" font-family="'JetBrains Mono', monospace" font-size="9" fill="#00FF66">Privacy Preserving</text>
 
   <rect x="666" y="358" width="178" height="80" rx="6" fill="#0b1116" stroke="#1f2d3a"/>
   <text x="678" y="380" font-family="sans-serif" font-size="12" font-weight="bold" fill="#ffffff">Hardware Cores</text>

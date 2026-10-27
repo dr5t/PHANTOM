@@ -22,7 +22,7 @@ export const Footer: React.FC = () => {
             </p>
             <div className="footer-runtime-status">
               <span className="status-dot" style={{ width: 6, height: 6 }} />
-              <span>LOCAL ENGINE: STANDBY · 0 TELEMETRY SENT</span>
+              <span>LOCAL ENGINE: STANDBY · LOCAL EXECUTION</span>
             </div>
           </div>
 
@@ -38,30 +38,30 @@ export const Footer: React.FC = () => {
             </div>
 
             <div className="footer-col">
-              <span className="footer-col-title">Supported Models</span>
+              <span className="footer-col-title">Recommended Models</span>
               <ul className="footer-links">
-                <li><span className="footer-link">Llama 3.2 3B Coder</span></li>
-                <li><span className="footer-link">Qwen 2.5 Coder 7B</span></li>
-                <li><span className="footer-link">DeepSeek-Coder 6.7B</span></li>
-                <li><span className="footer-link">Mistral NeMo 12B</span></li>
+                <li><span className="footer-link">Llama 3.2 (Recommended)</span></li>
+                <li><span className="footer-link">Qwen 2.5 Coder</span></li>
+                <li><span className="footer-link">DeepSeek-Coder</span></li>
+                <li><span className="footer-link">Auto-discovered via Ollama</span></li>
               </ul>
             </div>
 
             <div className="footer-col">
               <span className="footer-col-title">Developer & Privacy</span>
               <ul className="footer-links">
-                <li><span className="footer-link">Air-Gapped Local Architecture</span></li>
-                <li><span className="footer-link">Tree-sitter AST Forensics</span></li>
-                <li><span className="footer-link">RFC 7636 PKCE & Git DAG</span></li>
-                <li><span className="footer-link">MIT Open Source License</span></li>
+                <li><span className="footer-link">Local Repository Analysis</span></li>
+                <li><span className="footer-link">Git & Source Forensics</span></li>
+                <li><span className="footer-link">Commit History & Stashes</span></li>
+                <li><a href="https://github.com/dr5t/PHANTOM" target="_blank" rel="noopener noreferrer" className="footer-link">Source: github.com/dr5t/PHANTOM</a></li>
               </ul>
             </div>
           </div>
         </div>
 
         <div className="footer-bottom">
-          <span>&copy; {new Date().getFullYear()} PHANTOM Digital Archaeology. Local-first & open weights.</span>
-          <span>git://github.com/phantom-dev/phantom-core</span>
+          <span>&copy; 2026 PHANTOM by Shaurya Tiwari (<a href="https://github.com/dr5t" target="_blank" rel="noopener noreferrer" className="footer-link">@dr5t</a>). Local-first architecture.</span>
+          <span><a href="https://github.com/dr5t/PHANTOM" target="_blank" rel="noopener noreferrer" className="footer-link">https://github.com/dr5t/PHANTOM</a></span>
         </div>
       </div>
     </footer>

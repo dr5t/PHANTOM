@@ -247,7 +247,7 @@ export const RESURRECTION_REPORTS: Record<string, ResurrectionReport> = {
       },
       {
         stepNumber: 2,
-        title: 'Upgrade dependencies and run AST compatibility patch',
+        title: 'Upgrade dependencies and apply compatibility patch',
         actionCommand: 'npx phantom patch --target=nexus-auth-v2 --fix-jwt-v5',
         explanation: 'Transforms legacy JwtHelperService calls into modern WebCrypto subtle signatures.'
       },
@@ -276,7 +276,7 @@ export const LOCAL_MODELS: ModelOption[] = [
     ramRequired: '2.4 GB VRAM / Unified RAM',
     speed: '68 tokens/sec on Apple M-Series',
     provider: 'Ollama',
-    recommendedFor: 'Ultra-fast Git AST scanning, commit intent parsing, and instant local diff analysis.'
+    recommendedFor: 'Ultra-fast Git commit parsing, commit intent analysis, and instant local diff inspection.'
   },
   {
     id: 'qwen-2.5-coder-7b',

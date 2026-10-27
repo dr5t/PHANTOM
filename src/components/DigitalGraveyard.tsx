@@ -218,7 +218,7 @@ export const DigitalGraveyard: React.FC<DigitalGraveyardProps> = ({ onSelectRepo
             {filteredRepos.length} repositories listed · {backendConnected ? 'Live Local Git Engine Connected' : 'Local Archive'}
           </span>
           <span className="mono text-muted text-xs">
-            AST CACHE: READY · 0 EXTERNAL CONNECTIONS
+            LOCAL CACHE: READY · LOCAL ENGINE
           </span>
         </div>
       </div>

@@ -23,7 +23,7 @@ export const TerminalPreview: React.FC = () => {
     const rawText = `$ phantom scan ./nexus-auth-v2
 [OK] Repository discovered: git://local/nexus-auth-v2
 [OK] 83 commits indexed across 4 branches
-[OK] AST parser identified 14 source files (TypeScript)
+[OK] Source parser identified 14 source files (TypeScript)
 [INFO] 12 unresolved tasks detected in git comments & stashes
 [INFO] Reconstructing project history...
 [EVIDENCE] Last active: 214 days ago by @shauryatiwari
@@ -135,7 +135,7 @@ export const TerminalPreview: React.FC = () => {
               onClick={() => setActiveTab('evidence')}
             >
               <FileSearch size={13} />
-              <span>AST Evidence</span>
+              <span>Evidence Tree</span>
             </button>
           </div>
 
@@ -243,10 +243,10 @@ export const TerminalPreview: React.FC = () => {
                 <span className="terminal-highlight">9f2a71d</span>: &quot;wip: handle token rotation edge case&quot;
               </div>
               <div className="terminal-line">
-                <span className="terminal-log-warn">[WARN]</span> Uncommitted stash@{'{0}'} has 14 staged AST modifications
+                <span className="terminal-log-warn">[WARN]</span> Uncommitted stash@{'{0}'} has 14 staged file modifications
               </div>
               <div className="terminal-line terminal-comment">
-                # Local open-weight LLM (Llama 3.2 3B) analyzed git diffs with 0 bytes sent over network
+                # Local open-weight LLM (Llama 3.2 3B) analyzed git diffs locally
               </div>
 
               <div className="terminal-success-banner">
@@ -350,17 +350,17 @@ export const TerminalPreview: React.FC = () => {
             </div>
           )}
 
-          {/* Tab Content 3: AST Evidence */}
+          {/* Tab Content 3: Evidence Tree */}
           {activeTab === 'evidence' && (
-            <div className="terminal-body" tabIndex={0} aria-label="AST Evidence Inspector">
+            <div className="terminal-body" tabIndex={0} aria-label="Evidence Tree Inspector">
               <div className="terminal-line">
-                <span className="terminal-comment">// AST Evidence Tree Extracted from git rev-list</span>
+                <span className="terminal-comment">// Evidence Tree Extracted from Git Forensics</span>
               </div>
               <div className="terminal-line">
                 <span className="terminal-log-info">[TREE]</span> nexus-auth-v2 (HEAD -&gt; feature/pkce-v2)
               </div>
               <div className="terminal-line" style={{ paddingLeft: 16 }}>
-                ├── src/auth/provider.ts <span className="terminal-diff-remove">[AST Syntax Gap: line 142]</span>
+                ├── src/auth/provider.ts <span className="terminal-diff-remove">[Syntax Gap: line 142]</span>
               </div>
               <div className="terminal-line" style={{ paddingLeft: 16 }}>
                 │   └── function refreshToken(): Promise&lt;AuthSession&gt;

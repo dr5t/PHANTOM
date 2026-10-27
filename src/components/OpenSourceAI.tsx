@@ -81,8 +81,8 @@ export const OpenSourceAI: React.FC = () => {
                 </div>
                 <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 2 }}>
                   {ollamaRunning
-                    ? 'Genuine local neural inference is enabled. Zero network egress.'
-                    : (ollamaError || 'Factual Git forensics and AST TODO scans work 100% offline. To enable local AI analysis, start Ollama: `ollama serve`.')}
+                    ? 'Genuine local neural inference is enabled on your machine.'
+                    : (ollamaError || 'Factual Git forensics and source TODO scans work locally. To enable local AI analysis, start Ollama: `ollama serve`.')}
                 </div>
               </div>
             </div>
@@ -151,7 +151,7 @@ export const OpenSourceAI: React.FC = () => {
                     </div>
 
                     <div className="model-recommendation">
-                      Verified locally installed model ready for air-gapped forensic Q&amp;A.
+                      Verified locally installed model ready for local forensic Q&amp;A.
                     </div>
                   </div>
                 );
@@ -215,17 +215,17 @@ export const OpenSourceAI: React.FC = () => {
         <div className="privacy-bento">
           <div className="bento-card tech-card">
             <ShieldCheck size={20} className="bento-icon" />
-            <h4 className="bento-title">Zero Telemetry</h4>
+            <h4 className="bento-title">Local Execution</h4>
             <p className="bento-desc">
-              No analytics tracking, phone-home telemetry, or crash pings. Operates seamlessly behind strict air-gapped corporate proxies.
+              All repository indexing and Ollama neural inference execute on your machine. No telemetry or tracking is sent by the forensics backend.
             </p>
           </div>
 
           <div className="bento-card tech-card">
             <Lock size={20} className="bento-icon" />
-            <h4 className="bento-title">Air-Gapped Processing</h4>
+            <h4 className="bento-title">On-Device Processing</h4>
             <p className="bento-desc">
-              Git commit parsing, tree-sitter AST extraction, and vector diff similarity calculations occur strictly inside local RAM.
+              Git commit parsing, stash inspection, and source TODO extractions run directly in your local environment.
             </p>
           </div>
 
@@ -233,7 +233,7 @@ export const OpenSourceAI: React.FC = () => {
             <Cpu size={20} className="bento-icon" />
             <h4 className="bento-title">Hardware Acceleration</h4>
             <p className="bento-desc">
-              Leverages Apple Metal unified memory, NVIDIA CUDA, or modern AVX-512 CPU SIMD cores for sub-second responses.
+              Leverages Apple Metal unified memory, NVIDIA CUDA, or modern CPU SIMD cores supported by your local Ollama setup.
             </p>
           </div>
 
@@ -241,7 +241,7 @@ export const OpenSourceAI: React.FC = () => {
             <EyeOff size={20} className="bento-icon" />
             <h4 className="bento-title">Auditable Prompts</h4>
             <p className="bento-desc">
-              Inspect raw system prompts and AST evidence chunks sent to your local LLM runtime via the debug flag (`--trace-prompts`).
+              Inspect system prompts and bounded evidence items formatted before being passed to your local model.
             </p>
           </div>
         </div>

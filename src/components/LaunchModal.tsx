@@ -264,7 +264,7 @@ export const LaunchModal: React.FC<LaunchModalProps> = ({
                   className={`model-chip ${selectedModel === 'deepseek-coder-6.7b' ? 'selected' : ''}`}
                   onClick={() => setSelectedModel('deepseek-coder-6.7b')}
                 >
-                  DeepSeek-Coder 6.7B (AST · 4.8 GB)
+                  DeepSeek-Coder 6.7B (Code · 4.8 GB)
                 </button>
               </div>
             )}
@@ -327,7 +327,7 @@ export const LaunchModal: React.FC<LaunchModalProps> = ({
                   <Sparkles size={14} className="text-accent" />
                   <span>Evidence-Backed Repository Q&A ({ollamaRunning ? selectedModel : 'Forensic Fact Engine'})</span>
                 </label>
-                <span className="mono text-xs text-accent">AIR-GAPPED</span>
+                <span className="mono text-xs text-accent">LOCAL</span>
               </div>
 
               <div className="qa-conversation" tabIndex={0} aria-label="Conversation with local model">
