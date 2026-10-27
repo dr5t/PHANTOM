@@ -1,0 +1,206 @@
+.ghost-memory-section {
+  padding-top: clamp(60px, 8vw, 90px);
+  padding-bottom: clamp(60px, 8vw, 90px);
+  border-top: 1px solid var(--border);
+  position: relative;
+}
+
+.memory-header {
+  margin-bottom: 36px;
+}
+
+/* Filter Bar */
+.memory-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.filter-btn:hover {
+  background-color: var(--surface-hover);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+.filter-btn.active {
+  color: #080B0D;
+  background-color: var(--accent);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+/* Timeline Layout */
+.timeline-container {
+  position: relative;
+  padding-left: 28px;
+}
+
+.timeline-spine {
+  position: absolute;
+  top: 12px;
+  bottom: 24px;
+  left: 9px;
+  width: 1.5px;
+  background: linear-gradient(
+    to bottom,
+    var(--accent) 0%,
+    rgba(163, 255, 63, 0.4) 30%,
+    rgba(255, 255, 255, 0.1) 80%,
+    transparent 100%
+  );
+}
+
+.timeline-event-item {
+  position: relative;
+  margin-bottom: 36px;
+}
+
+.timeline-event-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -28px;
+  top: 18px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background-color: var(--background);
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-shadow: 0 0 10px rgba(163, 255, 63, 0.3);
+}
+
+.timeline-marker-inner {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--accent);
+}
+
+.event-card {
+  padding: 24px;
+}
+
+.event-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.event-badges-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fact-badge {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.fact-badge.fact {
+  border-color: rgba(100, 181, 246, 0.3);
+  color: #90CAF9;
+}
+
+.event-timestamp {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.event-message {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  line-height: 1.4;
+  font-family: var(--font-mono);
+}
+
+.event-reference-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.775rem;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.event-code-snippet {
+  background-color: var(--terminal-background);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  color: #D1D5DB;
+}
+
+/* AI Interpretation Box */
+.ai-interpretation-box {
+  background-color: rgba(179, 136, 255, 0.05);
+  border: 1px solid rgba(179, 136, 255, 0.22);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai-box-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: #D1C4E9;
+  letter-spacing: 0.05em;
+}
+
+.ai-box-header .confidence {
+  color: var(--accent);
+}
+
+.ai-box-text {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
